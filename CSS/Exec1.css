@@ -1,0 +1,40 @@
+body{
+    margin-left: 100px;
+    margin-right: 100px;
+}
+p {
+    border: 4px solid pink;
+    padding: 10px;
+}
+
+h1{
+    color: lightseagreen;
+    text-align: center;
+}
+
+#nome{
+    color: lightseagreen;
+    border: 4px solid pink;
+    border-radius: 50px;
+    padding: 10px;
+    width: 200px;
+}
+
+.main{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: space-around;
+}
+
+.content{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.rodape{
+    display: flex;
+    justify-content: center;
+}

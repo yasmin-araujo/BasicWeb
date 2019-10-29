@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Exercício 19</title>
+    <script src="myscript19.js"></script>
+</head>
+<body>
+    <p>Operação (+, -, *, /)</p>
+    <input onkeyup="validateop()" type="text" id="Operacao" placeholder="Digite a operação"/>
+    <p>Operando 1</p>
+    <input onkeyup="validatenum(1)" type="text" id="Prim" placeholder="Digite o primeiro valor"/>
+    <p>Operando 2</p>
+    <input onkeyup="validatenum(2)" type="text" id="Seg" placeholder="Digite o segundo valor"/><br><br>
+    <button onclick="calc()">Calcular</button>
+    <p id="Res"></p>
+</body>
+</html>
