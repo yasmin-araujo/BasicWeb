@@ -1,0 +1,40 @@
+.main {
+	height: 100%vh;
+	width: 100%vw;
+	background-color: rgb(235, 235, 235);
+}
+
+.big-square {
+	height: 1050px;
+	width: 1050px;
+	background-color: lightgray;
+	display: flex;
+}
+
+.little-square {
+	width: 100px;
+	height: 100px;
+	position: absolute;
+	flex-wrap: wrap;
+	border-radius: 20px;
+	border: 2px solid white;
+	transition: 0.3s;
+	transform: scale(1);
+}
+
+.little-square:hover {
+	transform: scale(1.1);
+	z-index: 1;
+}
+
+.little-square-selected {
+    width: 100px;
+	height: 100px;
+	position: absolute;
+	flex-wrap: wrap;
+	border-radius: 20px;
+	border: 2px solid white;
+	transition: 0.3s;
+	transform: scale(1.1);
+	z-index: 1;
+}
