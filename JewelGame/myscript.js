@@ -6,26 +6,32 @@
 let colors = [ 'pink', 'lightblue', 'palegreen', 'plum', 'NavajoWhite' ]; // 'mediumorchid','lightsalmon',
 let firstClick = null;
 let secondClick = null;
+let del = false;
 
 window.onload = function() {
+	// preenche a grade
 	let padd = 22.5;
 	for (let i = 0; i < 10; i++) {
 		for (let j = 0; j < 10; j++) {
 			let square = document.createElement('div');
 			let random = Math.floor(Math.random() * colors.length);
 			let color = colors[random];
+
 			square.style.backgroundColor = color;
 			square.style.top = i * 102 + padd + 'px';
 			square.style.left = j * 102 + padd + 'px';
 			square.className = 'little-square';
 			square.id = '' + i + j;
+
 			this.document.getElementById('big-square').appendChild(square);
 			square.onclick = function() {
 				clicked(square);
 			};
 		}
 	}
-	this.check();
+	// checa combinações
+	setTimeout(check, 780);
+	// this.check();
 };
 
 function clicked(element) {
@@ -35,30 +41,33 @@ function clicked(element) {
 	} else if (secondClick == null) {
 		secondClick = element;
 		firstClick.className = 'little-square';
+		// confere se são vizinhos
 		let top = parseInt(firstClick.style.top, 10) - parseInt(secondClick.style.top, 10);
 		let left = parseInt(firstClick.style.left, 10) - parseInt(secondClick.style.left, 10);
-		console.log(top, left);
 		if (!(top <= 102 && top >= -102 && (left <= 102 && left >= -102) && (top == 0 || left == 0))) {
 			firstClick = null;
 			secondClick = null;
 			return;
 		}
 	} else return;
-	console.log(element.style.backgroundColor);
 	swap();
 }
 
 function swap() {
 	if (firstClick == null || secondClick == null) return;
+
 	let ft = firstClick.style.top;
 	let fl = firstClick.style.left;
 	let fi = firstClick.id;
+
 	firstClick.style.top = secondClick.style.top;
 	firstClick.style.left = secondClick.style.left;
 	firstClick.id = secondClick.id;
+
 	secondClick.style.top = ft;
 	secondClick.style.left = fl;
 	secondClick.id = fi;
+
 	firstClick = null;
 	secondClick = null;
 	setTimeout(check, 780);
@@ -66,7 +75,8 @@ function swap() {
 
 //check combinations
 function check() {
-	console.log('AHAAAAAAA');
+	del = false;
+
 	//check horizontal
 	let cnt = 1;
 	let current_elem;
@@ -76,123 +86,151 @@ function check() {
 			let id = '' + i + j;
 			// console.log("HID", id);
 			current_elem = document.getElementById(id);
-			if (current_elem == null) {
-				continue;
-			} else if (current_elem.style.backgroundColor == color_strike)
-				// console.log("FOI", current_elem.style.backgroundColor, color_strike, cnt);
-				cnt++;
-			else {
-				if (cnt >= 3) {
-					for (let k = 1; k <= cnt; k++) {
-						let del_id = '' + id - k;
-						if (id - k < 10) del_id = '0' + del_id;
 
-						let delete_elem = document.getElementById(del_id);
-						if (delete_elem != null) {
-							console.log(cnt, delete_elem.style.backgroundColor, color_strike, del_id, k);
-							document.getElementById('big-square').removeChild(delete_elem);
-							// delete_elem.style.top = '1000px';
-							// this.document.getElementById('resto').appendChild(delete_elem);
-						} else {
-							color_strike = current_elem.style.backgroundColor;
-							// console.log('null', cnt, id, color_strike, k, id - k);
-						}
+			// se não for buraco -> ver se continua a sequencia ou se deleta
+			// se for buraco -> se cnt >= 3 - deleta eles e zera, senao só zera
+
+			// não é buraco
+			if (current_elem != null) {
+				// segue a sequencia
+				if (current_elem.style.backgroundColor == color_strike) {
+					cnt++;
+					if (j == 9) {
+						del = seq_delete_hor(del, cnt, '' + (parseInt(id) + 1));
 					}
+					//não segue a seq -> começa uma nova
+				} else {
+					//deleta sequencia anterior (se existente)
+					del = seq_delete_hor(del, cnt, id);
+					color_strike = current_elem.style.backgroundColor;
+					cnt = 1;
 				}
-				color_strike = current_elem.style.backgroundColor;
-				cnt = 1;
+				// é buraco
+			} else {
+				// deleta sequencia
+				del = seq_delete_hor(del, cnt, id);
+				color_strike = null;
+				cnt = 0;
 			}
 		}
 		color_strike = null;
+		cnt = 0;
 	}
 
 	cnt = 1;
+	color_strike = null;
 
 	//check vertical
 	for (let j = 0; j < 10; j++) {
 		for (let i = 0; i < 10; i++) {
 			let id = '' + i + j;
 			current_elem = document.getElementById(id);
-			// console.log("VID", id);
-			// if (current_elem.parentElement != document.getElementById('big-square')) {
-			if (current_elem == null) {
-				// console.log('BORA', current_elem.id, current_elem.parentElement);
-				continue;
-			} else if (current_elem.style.backgroundColor == color_strike) {
-				// console.log("FOI H ", current_elem.style.backgroundColor, color_strike, cnt);
-				cnt++;
-				if (i != 9) continue;
-			}
-			if (cnt >= 3) {
-				for (let k = 1; k <= cnt; k++) {
-					let aux = 0;
-					let del_id;
-					let delete_elem;
 
-					do {
-						del_id = '' + id[0] - k - aux + id[1];
-						if (id - k - aux < 10) del_id = '0' + del_id;
-						delete_elem = document.getElementById(del_id);
-						aux++;
-					} while (delete_elem == null);
-					if (delete_elem != null) {
-						console.log('delete', cnt, delete_elem.style.backgroundColor, color_strike, del_id, k);
-						document.getElementById('big-square').removeChild(delete_elem);
-						// delete_elem.style.left = '1000px';
-						// this.document.getElementById('resto').appendChild(delete_elem);
-					} else {
-						color_strike = current_elem.style.backgroundColor;
-						// console.log('null', cnt, id, color_strike, k, id - k);
+			// sem buraco -> ve se continua seq ou del
+
+			if (current_elem != null) {
+				if (current_elem.style.backgroundColor == color_strike) {
+					cnt++;
+					if (i == 9) {
+						del = seq_delete_ver(del, cnt, '' + (parseInt(id) + 10));
 					}
+					// não é null e nem segue a seq -> começa uma nova
+				} else {
+					//deleta sequencia anterior (se existente)
+					del = seq_delete_ver(del, cnt, id);
+					color_strike = current_elem.style.backgroundColor;
+					cnt = 1;
 				}
+			} else {
+				// deleta sequencia (se existente)
+				del = seq_delete_ver(del, cnt, id);
+				color_strike = null;
+				cnt = 0;
 			}
-			color_strike = current_elem.style.backgroundColor;
-			cnt = 1;
-			// console.log('UE');
 		}
 		color_strike = null;
+		cnt = 0;
 	}
-	gravity();
+
+	if (del) gravity();
+}
+
+function seq_delete_hor(del, cnt, id) {
+	if (cnt >= 3) {
+		// para cada bloco da sequencia
+		for (let k = 1; k <= cnt; k++) {
+			let del_id = '' + id - k;
+			if (id - k < 10) del_id = '0' + del_id;
+
+			let delete_elem = document.getElementById(del_id);
+			if (delete_elem != null) {
+				document.getElementById('big-square').removeChild(delete_elem);
+				del = true;
+			}
+		}
+	}
+	return del;
+}
+
+function seq_delete_ver(del, cnt, id) {
+	if (cnt >= 3) {
+		// para cada bloco da sequencia
+		for (let k = 1; k <= cnt; k++) {
+			let del_id = '' + id - k * 10;
+			if (id - k * 10 < 10) del_id = '0' + del_id;
+
+			let delete_elem = document.getElementById(del_id);
+
+			if (delete_elem != null) {
+				document.getElementById('big-square').removeChild(delete_elem);
+				del = true;
+			}
+		}
+	}
+	return del;
 }
 
 //precisa checar matriz de baixo pra cima
 function gravity() {
-	console.log('CAI CAI');
 	let dist = 0;
-	//Vertical
-	for (let j = 0; j < 10; j++) {
-		//primeira coluna pra ultima
-		for (let i = 9; i >= 0; i--) {
-			//ultima linha pra primeira
-			let id = '' + i + j;
-            let current_elem = document.getElementById(id);
-            console.log('id: ', id);
-			let next_elem;
-			let nid = i + 1;
 
+	//Vertical
+
+	//primeira coluna pra ultima (esquerda para direita)
+	for (let j = 0; j < 10; j++) {
+		//ultima linha pra primeira (baixo para cima)
+		for (let i = 9; i >= 0; i--) {
+			let id = '' + i + j;
+			let current_elem = document.getElementById(id);
+			let next_elem;
+			let nid = i + 1; // next id
+
+			// se elemento existe
 			if (current_elem != null) {
+				// achar id do próximo elemento não nulo
 				do {
 					next_elem = document.getElementById('' + nid + j);
-					console.log('next: ', '' + (i + 1) + j);
 					nid++;
 				} while (next_elem == null && nid < 10);
 
 				if (next_elem != null) {
 					dist = parseFloat(next_elem.style.top) - parseFloat(current_elem.style.top);
-                    console.log("FICA AQUI Ó", current_elem.style.top);
-					console.log('dist: ', dist);
-                    let top = parseFloat(current_elem.style.top);
+					let top = parseFloat(current_elem.style.top);
 					while (dist > 110) {
-                        // console.log("AAAA", ( parseFloat(current_elem.style.top) + 102 ));
-                        top += 102;
-                        current_elem.style.top = top + "PX";
-                        console.log("VAMO LOGO", current_elem.style.top);
-                        dist = parseFloat(next_elem.style.top) - top;
-                        // dist = parseFloat(next_elem.style.top) - 100;
-                        console.log("DESGRAÇA ", dist, parseFloat(next_elem.style.top), top);
+						current_elem.id = '' + (parseInt(current_elem.id) + 10);
+						top += 102;
+						current_elem.style.top = top + 'px';
+						dist = parseFloat(next_elem.style.top) - top;
 					}
+				} else if (nid >= 10) {
+					// ultima linha com buraco
+					current_elem.id = '' + 9 + j;
+					current_elem.style.top = '940.5px';
 				}
 			}
 		}
-	}
+    }
+    
+	setTimeout(check, 780);
+	// check();
 }
