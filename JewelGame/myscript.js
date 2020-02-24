@@ -1,16 +1,26 @@
-/*
-- Buracos -> é so arrumar a gravidade
-
-
-*/
 let colors = [ 'pink', 'lightblue', 'palegreen', 'plum', 'NavajoWhite' ]; // 'mediumorchid','lightsalmon',
 let firstClick = null;
 let secondClick = null;
 let del = false;
+let points = 0;
+let max_score = 0;
+let points_element;
+let max_score_element;
+let square_size = 72;
+let last_row_top;
 
-window.onload = function() {
+window.onload = () => {
+	buildGame();
+};
+
+const buildGame = function() {
+    //ajusta tamanho de tela
+	if (screen.width < 1000) {
+		square_size = 92;
+    } else square_size = 72;
+    
 	// preenche a grade
-	let padd = 22.5;
+	let padd = 22.5; //padding left para os quadradinhos
 	for (let i = 0; i < 10; i++) {
 		for (let j = 0; j < 10; j++) {
 			let square = document.createElement('div');
@@ -18,8 +28,8 @@ window.onload = function() {
 			let color = colors[random];
 
 			square.style.backgroundColor = color;
-			square.style.top = i * 102 + padd + 'px';
-			square.style.left = j * 102 + padd + 'px';
+			square.style.top = i * square_size + padd + 'px';
+			square.style.left = j * square_size + padd + 'px';
 			square.className = 'little-square';
 			square.id = '' + i + j;
 
@@ -29,10 +39,44 @@ window.onload = function() {
 			};
 		}
 	}
+
+	firstClick = null;
+	secondClick = null;
+	points = 0;
+
+	last_row_top = this.document.getElementById('99').style.top;
+	points_element = document.getElementById('points');
+	points_element.innerHTML = 'Pontos: ' + points;
+
+	max_score = localStorage.getItem('max_score');
+	if (max_score == null) max_score = 0;
+	max_score_element = this.document.getElementById('high_score');
+	max_score_element.innerHTML = 'High Score: ' + max_score + ' pontos';
+
 	// checa combinações
 	setTimeout(check, 780);
 	// this.check();
 };
+
+function restart_game() {
+	if (points > max_score) localStorage.setItem('max_score', points);
+	// location.reload();
+	// return false;
+	while (this.document.getElementById('big-square').firstChild) {
+		this.document.getElementById('big-square').firstChild.remove();
+	}
+	buildGame();
+}
+
+function reset_game() {
+	localStorage.removeItem('max_score');
+	// location.reload();
+	// return false;
+	while (this.document.getElementById('big-square').firstChild) {
+		this.document.getElementById('big-square').firstChild.remove();
+	}
+	buildGame();
+}
 
 function clicked(element) {
 	if (firstClick == null) {
@@ -44,7 +88,14 @@ function clicked(element) {
 		// confere se são vizinhos
 		let top = parseInt(firstClick.style.top, 10) - parseInt(secondClick.style.top, 10);
 		let left = parseInt(firstClick.style.left, 10) - parseInt(secondClick.style.left, 10);
-		if (!(top <= 102 && top >= -102 && (left <= 102 && left >= -102) && (top == 0 || left == 0))) {
+		if (
+			!(
+				top <= square_size &&
+				top >= -square_size &&
+				(left <= square_size && left >= -square_size) &&
+				(top == 0 || left == 0)
+			)
+		) {
 			firstClick = null;
 			secondClick = null;
 			return;
@@ -84,7 +135,6 @@ function check() {
 	for (let i = 0; i < 10; i++) {
 		for (let j = 0; j < 10; j++) {
 			let id = '' + i + j;
-			// console.log("HID", id);
 			current_elem = document.getElementById(id);
 
 			// se não for buraco -> ver se continua a sequencia ou se deleta
@@ -167,8 +217,10 @@ function seq_delete_hor(del, cnt, id) {
 				document.getElementById('big-square').removeChild(delete_elem);
 				del = true;
 			}
+			points++;
 		}
 	}
+	points_element.innerHTML = 'Pontos: ' + points;
 	return del;
 }
 
@@ -185,8 +237,10 @@ function seq_delete_ver(del, cnt, id) {
 				document.getElementById('big-square').removeChild(delete_elem);
 				del = true;
 			}
+			points++;
 		}
 	}
+	points_element.innerHTML = 'Pontos: ' + points;
 	return del;
 }
 
@@ -216,21 +270,21 @@ function gravity() {
 				if (next_elem != null) {
 					dist = parseFloat(next_elem.style.top) - parseFloat(current_elem.style.top);
 					let top = parseFloat(current_elem.style.top);
-					while (dist > 110) {
+					while (dist > square_size + 5) {
 						current_elem.id = '' + (parseInt(current_elem.id) + 10);
-						top += 102;
+						top += square_size;
 						current_elem.style.top = top + 'px';
 						dist = parseFloat(next_elem.style.top) - top;
 					}
 				} else if (nid >= 10) {
 					// ultima linha com buraco
 					current_elem.id = '' + 9 + j;
-					current_elem.style.top = '940.5px';
+					current_elem.style.top = last_row_top;
 				}
 			}
 		}
-    }
-    
+	}
+
 	setTimeout(check, 780);
 	// check();
 }
