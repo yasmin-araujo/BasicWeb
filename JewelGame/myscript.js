@@ -8,17 +8,20 @@ let points_element;
 let max_score_element;
 let square_size = 72;
 let last_row_top;
+let streak = 0;
+let cnt_streak = 0;
+let combo_element;
 
 window.onload = () => {
 	buildGame();
 };
 
 const buildGame = function() {
-    //ajusta tamanho de tela
+	//ajusta tamanho de tela
 	if (screen.width < 1000) {
 		square_size = 92;
-    } else square_size = 72;
-    
+	} else square_size = 72;
+
 	// preenche a grade
 	let padd = 22.5; //padding left para os quadradinhos
 	for (let i = 0; i < 10; i++) {
@@ -43,10 +46,15 @@ const buildGame = function() {
 	firstClick = null;
 	secondClick = null;
 	points = 0;
+	streak = 0;
+	cnt_streak = 0;
 
 	last_row_top = this.document.getElementById('99').style.top;
 	points_element = document.getElementById('points');
 	points_element.innerHTML = 'Pontos: ' + points;
+
+	combo_element = document.getElementById('combo');
+	combo_element.innerHTML = 'Combo: ' + streak;
 
 	max_score = localStorage.getItem('max_score');
 	if (max_score == null) max_score = 0;
@@ -121,17 +129,19 @@ function swap() {
 
 	firstClick = null;
 	secondClick = null;
+	cnt_streak = 0;
 	setTimeout(check, 780);
 }
 
 //check combinations
 function check() {
+	// cnt_streak++;
 	del = false;
 
 	//check horizontal
 	let cnt = 1;
 	let current_elem;
-	let color_strike = null;
+	let color_streak = null;
 	for (let i = 0; i < 10; i++) {
 		for (let j = 0; j < 10; j++) {
 			let id = '' + i + j;
@@ -143,7 +153,7 @@ function check() {
 			// não é buraco
 			if (current_elem != null) {
 				// segue a sequencia
-				if (current_elem.style.backgroundColor == color_strike) {
+				if (current_elem.style.backgroundColor == color_streak) {
 					cnt++;
 					if (j == 9) {
 						del = seq_delete_hor(del, cnt, '' + (parseInt(id) + 1));
@@ -152,23 +162,23 @@ function check() {
 				} else {
 					//deleta sequencia anterior (se existente)
 					del = seq_delete_hor(del, cnt, id);
-					color_strike = current_elem.style.backgroundColor;
+					color_streak = current_elem.style.backgroundColor;
 					cnt = 1;
 				}
 				// é buraco
 			} else {
 				// deleta sequencia
 				del = seq_delete_hor(del, cnt, id);
-				color_strike = null;
+				color_streak = null;
 				cnt = 0;
 			}
 		}
-		color_strike = null;
+		color_streak = null;
 		cnt = 0;
 	}
 
 	cnt = 1;
-	color_strike = null;
+	color_streak = null;
 
 	//check vertical
 	for (let j = 0; j < 10; j++) {
@@ -179,7 +189,7 @@ function check() {
 			// sem buraco -> ve se continua seq ou del
 
 			if (current_elem != null) {
-				if (current_elem.style.backgroundColor == color_strike) {
+				if (current_elem.style.backgroundColor == color_streak) {
 					cnt++;
 					if (i == 9) {
 						del = seq_delete_ver(del, cnt, '' + (parseInt(id) + 10));
@@ -188,21 +198,29 @@ function check() {
 				} else {
 					//deleta sequencia anterior (se existente)
 					del = seq_delete_ver(del, cnt, id);
-					color_strike = current_elem.style.backgroundColor;
+					color_streak = current_elem.style.backgroundColor;
 					cnt = 1;
 				}
 			} else {
 				// deleta sequencia (se existente)
 				del = seq_delete_ver(del, cnt, id);
-				color_strike = null;
+				color_streak = null;
 				cnt = 0;
 			}
 		}
-		color_strike = null;
+		color_streak = null;
 		cnt = 0;
 	}
 
-	if (del) gravity();
+	if (del) {
+		gravity();
+		cnt_streak++;
+		streak++;
+		if (streak > 1) combo_element.innerHTML = 'Combo: ' + streak + 'X pontos';
+	} else if (cnt_streak == 0) {
+		streak = 0;
+		combo_element.innerHTML = 'Combo: ' + streak;
+	}
 }
 
 function seq_delete_hor(del, cnt, id) {
@@ -217,7 +235,7 @@ function seq_delete_hor(del, cnt, id) {
 				document.getElementById('big-square').removeChild(delete_elem);
 				del = true;
 			}
-			points++;
+			points += Math.max(1, streak);
 		}
 	}
 	points_element.innerHTML = 'Pontos: ' + points;
@@ -237,7 +255,7 @@ function seq_delete_ver(del, cnt, id) {
 				document.getElementById('big-square').removeChild(delete_elem);
 				del = true;
 			}
-			points++;
+			points += Math.max(1, streak);
 		}
 	}
 	points_element.innerHTML = 'Pontos: ' + points;
